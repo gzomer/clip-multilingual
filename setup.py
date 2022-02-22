@@ -5,6 +5,8 @@ from setuptools import setup, find_packages
 
 setup(
     name='clip-multilingual',
+    package_dir={'clip_multilingual': ''},
+    packages=['clip_multilingual'],
     version='1.0',
     description='MultiLingual CLIP',
     author='Gustavo Zomer',
