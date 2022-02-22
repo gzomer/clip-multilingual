@@ -1,6 +1,6 @@
 import torch
 
-from models import create_tokenizer
+from .models import create_tokenizer
 
 class MultiLingualSearch:
     def __init__(self, model, images_embeddings, images_data, device='cpu'):
