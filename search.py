@@ -1,13 +1,13 @@
 import torch
 
-from .models import create_tokenizer
+from .models import create_tokenizer, create_and_load_from_hub
 
 class MultiLingualSearch:
-    def __init__(self, model, images_embeddings, images_data, device='cpu'):
-        self.model = model
+    def __init__(self, images_embeddings, images_data, model = None, device='cpu'):
+        self.model = model if model else create_and_load_from_hub()
+        self.tokenizer = create_tokenizer()
         self.images_embeddings = images_embeddings
         self.images_data = images_data
-        self.tokenizer = create_tokenizer()
         self.device = device
 
     def compare_embeddings(self, logit_scale, img_embs, txt_embs):

@@ -1,5 +1,6 @@
 from typing import Dict
 
+import clip
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,7 +14,9 @@ TRANSFORMER_EMBED_DIM = 768
 MAX_LEN = 64
 FREEZE_ENCODERS = True
 MODEL_REPO = 'gzomer/clip-multilingual'
-DEFAULT_TOKENIZER = 'xlm-roberta-base'
+DEFAULT_TEXT_MODEL_NAME = 'xlm-roberta-base'
+DEFAULT_VISUAL_MODEL_NAME = 'RN50x4'
+DEFAULT_NUM_LAYERS = 3
 
 class Projection(nn.Module):
     def __init__(self, d_in: int, d_out: int, p: float=0.5, num_layers=3) -> None:
@@ -106,7 +109,7 @@ class MultiLingualCLIP(pl.LightningModule):
         self.text_encoder = TextEncoder(text_model_name, embed_dim, num_layers=num_layers)
 
 
-def create_tokenizer(model_name=DEFAULT_TOKENIZER):
+def create_tokenizer(model_name=DEFAULT_TEXT_MODEL_NAME):
     return Tokenizer(AutoTokenizer.from_pretrained(model_name))
 
 
@@ -123,3 +126,19 @@ def load_from_hub(model, device='cpu'):
     visual_model_checkpoint = cached_download(url=clip_visual_projection_url)
 
     load_model(model, visual_model_checkpoint, text_model_checkpoint, device=device)
+
+
+def create_default_model():
+    clip_model, compose = clip.load(DEFAULT_VISUAL_MODEL_NAME)
+    return MultiLingualCLIP(
+        clip_model=clip_model,
+        text_model_name=DEFAULT_TEXT_MODEL_NAME,
+        num_layers=DEFAULT_NUM_LAYERS,
+        clip_embed_dim=CLIP_EMBED_DIM,
+        embed_dim=EMBED_DIM,
+    )
+
+def create_and_load_from_hub():
+    model = create_default_model()
+    load_from_hub(model)
+    return model
