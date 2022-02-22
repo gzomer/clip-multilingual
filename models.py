@@ -100,6 +100,7 @@ class MultiLingualCLIP(pl.LightningModule):
                  embed_dim = EMBED_DIM,
         ) -> None:
         super().__init__()
+        self.clip_model = clip_model
         self.vision_encoder = VisionEncoder(
             clip_model.visual,
             clip_embed_dim,
