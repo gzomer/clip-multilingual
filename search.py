@@ -26,7 +26,7 @@ class MultiLingualSearch:
         tokens = {k: v.to(self.device) for k, v in tokens.items()}
 
         with torch.no_grad():
-            txt_embs = model.caption_encoder(tokens)
+            txt_embs = model.text_encoder(tokens)
 
         images_tensors = torch.tensor(images_embeddings)
 
