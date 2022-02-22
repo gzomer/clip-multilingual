@@ -1,6 +1,11 @@
+clip @ https://github.com/openai/CLIP/archive/master.zip#egg=clip
 torch
 torchvision
+pytorch_lightning
 transformers
 huggingface_hub
 numpy
-clip @ https://github.com/openai/CLIP/archive/master.zip#egg=clip
+wandb
+pycocotools
+ftfy
+pillow
