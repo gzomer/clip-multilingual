@@ -1,6 +1,6 @@
+git+https://github.com/openai/CLIP.git
 torch
 torchvision
-#git+https://github.com/openai/CLIP.git
 transformers
 huggingface_hub
 numpy
