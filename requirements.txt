@@ -1,4 +1,3 @@
-git+https://github.com/openai/CLIP.git#egg=clip
 torch
 torchvision
 transformers
