@@ -7,7 +7,7 @@ setup(
     name='clip-multilingual',
     package_dir={'clip_multilingual': ''},
     packages=['clip_multilingual'],
-    version='1.0',
+    version='1.0.1',
     description='MultiLingual CLIP',
     author='Gustavo Zomer',
     install_requires=[
