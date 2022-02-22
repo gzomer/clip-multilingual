@@ -3,3 +3,4 @@ torchvision
 transformers
 huggingface_hub
 numpy
+clip @ https://github.com/openai/CLIP/archive/master.zip#egg=clip

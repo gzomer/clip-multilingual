@@ -17,7 +17,4 @@ setup(
             open(os.path.join(os.path.dirname(__file__), 'requirements.txt'))
         )
     ],
-    dependency_links = [
-        'git+https://github.com/openai/CLIP.git#egg=clip',
-    ],
 )
