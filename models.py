@@ -94,6 +94,8 @@ class TextEncoder(nn.Module):
 class MultiLingualCLIP(pl.LightningModule):
     def __init__(self,
                  clip_model,
+                 image_transform,
+                 tokenizer,
                  text_model_name,
                  num_layers = 3,
                  clip_embed_dim = CLIP_EMBED_DIM,
@@ -101,6 +103,8 @@ class MultiLingualCLIP(pl.LightningModule):
         ) -> None:
         super().__init__()
         self.clip_model = clip_model
+        self.image_transform = image_transform
+        self.tokenizer = tokenizer
         self.vision_encoder = VisionEncoder(
             clip_model.visual,
             clip_embed_dim,
@@ -131,8 +135,12 @@ def load_from_hub(model, device='cpu'):
 
 def create_default_model():
     clip_model, compose = clip.load(DEFAULT_VISUAL_MODEL_NAME)
+    tokenizer = create_tokenizer()
+
     return MultiLingualCLIP(
         clip_model=clip_model,
+        image_transform=compose,
+        tokenizer=tokenizer,
         text_model_name=DEFAULT_TEXT_MODEL_NAME,
         num_layers=DEFAULT_NUM_LAYERS,
         clip_embed_dim=CLIP_EMBED_DIM,

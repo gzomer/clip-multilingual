@@ -5,6 +5,7 @@ from .models import create_tokenizer, create_and_load_from_hub
 class MultiLingualSearch:
     def __init__(self, images_embeddings, images_data, model = None, device='cpu'):
         self.model = model if model else create_and_load_from_hub()
+        self.model.eval()
         self.tokenizer = create_tokenizer()
         self.images_embeddings = images_embeddings
         self.images_data = images_data
