@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
-from transformers import AutoModel, AutoTokenizer, BertTokenizer
+from transformers import AutoModel, AutoTokenizer
 from huggingface_hub import cached_download, hf_hub_url
 
 EMBED_DIM = 512
@@ -60,7 +60,7 @@ class VisionEncoder(nn.Module):
 
 
 class Tokenizer:
-    def __init__(self, tokenizer: BertTokenizer) -> None:
+    def __init__(self, tokenizer: AutoTokenizer) -> None:
         self.tokenizer = tokenizer
 
     def __call__(self, x: str) -> AutoTokenizer:
