@@ -11,12 +11,12 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 import wandb
 from torch.utils.data import random_split, DataLoader
-from torch.utils.data.distributed import DistributedSampler
 from pytorch_lightning.plugins import DDPPlugin
 from pytorch_lightning.loggers import WandbLogger
 from transformers import AutoTokenizer
 
-from .models import Tokenizer, MultiLingualCLIP, AutoTokenizer
+from .datasets import load_googlecc, load_coco
+from .models import Tokenizer, MultiLingualCLIP, AutoTokenizer, load_model
 from .checkpoint import PeriodicCheckpoint
 from .habana_utils import permute_params, adjust_tensors_for_save, change_state_dict_device
 
@@ -24,7 +24,8 @@ from .habana_utils import permute_params, adjust_tensors_for_save, change_state_
 # Default params
 DEFAULT_TRAIN_DEVICE = 'hpu'
 DEFAULT_DATASET_SPLIT = 0.8
-DEFAULT_DATASET_BASE_DIR = './datasets'
+DEFAULT_DATASET_BASE_DIR = './datasets/coco/'
+DEFAULT_DATASET_TYPE = 'coco'
 DEFAULT_DATASET_NUM_WORKERS = 8
 DEFAULT_WANDB_ENABLED = True
 DEFAULT_DISTRIBUTED_DEVICES_PER_NODE = 8
@@ -68,6 +69,7 @@ def init_habana(model):
 
 # Data preparation
 def create_data_loaders(
+    dataset_type,
     image_transform,
     tokenizer,
     dataset_base_dir: str,
@@ -76,20 +78,18 @@ def create_data_loaders(
     train_split: float,
     subset_size = None
     ):
-    target_transform = lambda x: tokenizer(random.choice(x))
-    coco_dataset = dset.CocoCaptions(
-        root = f'{dataset_base_dir}/train2014/',
-        annFile = f'{dataset_base_dir}/annotations/captions_train2014.json',
-        transform=image_transform,
-        target_transform=target_transform,
-    )
+
+    if dataset_type == 'googlecc':
+        dataset = load_googlecc(dataset_base_dir, image_transform, tokenizer)
+    else:
+        dataset = load_coco(dataset_base_dir, image_transform, tokenizer)
 
     if subset_size:
-        coco_dataset = torch.utils.data.Subset(coco_dataset, list(range(subset_size)))
+        dataset = torch.utils.data.Subset(dataset, list(range(subset_size)))
 
     # Split dataset into train and validation
-    train_len = int(train_split*len(coco_dataset))
-    train_data, valid_data = random_split(coco_dataset, [train_len, len(coco_dataset) - train_len])
+    train_len = int(train_split*len(dataset))
+    train_data, valid_data = random_split(dataset, [train_len, len(dataset) - train_len])
 
     train_dataloader = DataLoader(
         train_data,
@@ -240,8 +240,13 @@ def main(config):
         config.hyperparam_num_layers,
     )
 
+    # Resume from checkpoint (either when resuming training or for training with different dataset)
+    if config.checkpoint_load_vision_path and config.checkpoint_load_text_path:
+        load_model(model, config.checkpoint_load_vision_path, config.checkpoint_load_text_path)
+
     # Create data loaders
     train_dataloader, valid_dataloader = create_data_loaders(
+        config.dataset_type,
         image_transform,
         tokenizer,
         dataset_base_dir = config.dataset_dir,
@@ -324,6 +329,7 @@ def main(config):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset-num-workers', type=int, default=DEFAULT_DATASET_NUM_WORKERS, help='Number of workers')
+    parser.add_argument('--dataset-type', type=str, default=DEFAULT_DATASET_TYPE, help='Dataset type (coco or googlecc)')
     parser.add_argument('--dataset-dir', type=str, default=DEFAULT_DATASET_BASE_DIR, help='Dataset dir')
     parser.add_argument('--dataset-subset-size', type=int, help='Load only a subset of the dataset (useful for debugging)')
     parser.add_argument('--dataset-train-split', type=str, default=DEFAULT_DATASET_SPLIT, help='Dataset train split')
@@ -335,6 +341,8 @@ if __name__ == '__main__':
     parser.add_argument('--distributed-bucket-cap-mb', type=int, default=DEFAULT_DISTRIBUTED_BUCKET_MB, help='DDP bucket cap MB')
     parser.add_argument('--checkpoint-dir', type=str, default=DEFAULT_CHECKPOINT_DIR, help='Model checkpoint dir')
     parser.add_argument('--checkpoint-save-every-n', type=int, default=DEFAULT_CHECKPOINT_SAVE_EVERY, help='Save every n epochs')
+    parser.add_argument('--checkpoint-load-vision-path', type=str, help='Load vision encoder checkpoint')
+    parser.add_argument('--checkpoint-load-text-path', type=str, help='Load text encoder checkpoint')
     parser.add_argument('--model-visual-name', type=str, default=DEFAULT_VISUAL_MODEL_NAME, help='Which visual model to use')
     parser.add_argument('--model-textual-name', type=str, default=DEFAULT_TEXTUAL_MODEL_NAME, help='Which textual model to use')
     parser.add_argument('--hyperparam-num-layers', type=int, default=DEFAULT_HYPERPARAM_NUM_LAYERS, help='Number of layers')
