@@ -8,7 +8,7 @@ import tqdm
 from PIL import Image
 
 from .utils import cache
-from .models import create_default_model
+from .models import create_and_load_from_hub
 
 API_KEY = os.getenv('UNSPLASH_API_KEY')
 IMAGE_SIZE_DOWNLOAD = 'small'
@@ -80,7 +80,7 @@ def calculate_image_embeddings(model, images, device='cpu'):
 
 def generate_unsplash_embeddings(input_folder, output_folder, model=None, device='cpu'):
   if not model:
-    model = create_default_model()
+    model = create_and_load_from_hub()
 
   all_embeddings = []
   urls = []
@@ -110,7 +110,7 @@ if __name__ == '__main__':
   download_images_by_queries(queries, f'{base_folder}/images')
 
   # Create model
-  model = create_default_model()
+  model = create_and_load_from_hub()
   model.to(device)
 
   # Generate embeddings
