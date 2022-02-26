@@ -1,0 +1,26 @@
+people
+family
+education
+people in nature
+people working
+people running
+people having fun
+people dancing
+meetings
+city
+cat
+dog
+nature
+food
+pasta
+car
+building
+animal
+tree
+flower
+sky
+landscape
+beaches
+vacations
+ships
+architecture
