@@ -2,6 +2,7 @@ import torch
 
 from .models import create_tokenizer, create_and_load_from_hub
 
+
 class MultiLingualSearch:
     def __init__(self, images_embeddings, images_data, model = None, device='cpu'):
         self.model = model if model else create_and_load_from_hub()
