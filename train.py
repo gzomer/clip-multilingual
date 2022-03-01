@@ -1,6 +1,7 @@
 import os
 import random
 import argparse
+import sys
 from typing import Tuple, List
 from copy import deepcopy
 
@@ -328,6 +329,9 @@ def main(config):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    if len(sys.argv) == 1:
+        parser.print_help()
+        parser.exit()
     parser.add_argument('--dataset-num-workers', type=int, default=DEFAULT_DATASET_NUM_WORKERS, help='Number of workers')
     parser.add_argument('--dataset-type', type=str, default=DEFAULT_DATASET_TYPE, help='Dataset type (coco or googlecc)')
     parser.add_argument('--dataset-dir', type=str, default=DEFAULT_DATASET_BASE_DIR, help='Dataset dir')
